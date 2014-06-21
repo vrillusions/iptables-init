@@ -1,0 +1,53 @@
+## Initial setup
+
+```shell
+# Become root for these steps if you don't login to server as root
+sudo su -
+mkdir /root/iptables
+cd /root/iptables
+# These links can be obtained by viewing a file and then choose raw
+# As of May 2014 these links are valid
+wget https://raw.githubusercontent.com/vrillusions/iptables-init/master/iptables-init.sh
+wget https://raw.githubusercontent.com/vrillusions/iptables-init/master/iptables-reset.sh
+chmod 0700 iptables-init.sh
+chmod 0755 iptables-reset.sh
+# Edit iptables-init.sh as needed (by default it allows ssh (TCP/22) and both
+# http (TCP/80) and https (TCP/443). Also defaults may not work with some vps
+# providers. See the file for more info
+#
+# Before running this make sure you have a way to recover, either the ability
+# to power cycle the server or an admin console you can issue commands.
+/root/iptables/iptables-init.sh
+# If nothing works and you get kicked from server, restart the system or via
+# console run /root/iptables/iptables-reset.sh to get back in. Adjust settings
+# and try again.
+#
+# If it does work:
+cp iptables-init.sh iptables-init-verified.sh
+echo "/root/iptables/iptables-init-verified.sh >/dev/null" >>/etc/rc.local
+```
+
+From that point on your work flow should be first edit the `iptables-init.sh` file. Then if after running that and are sure it works then copy it to `iptables-init-verified.sh`. In this way you should always be able to restart the system and have previous settings.
+
+## Configuration
+
+By default it will:
+
+- allow incoming requests to TCP ports 80 and 443
+- allow TCP/22 for ssh with a limiter (8 attempts/min)
+- by default will allow all outgoing traffic and block all incoming
+- some things will be logging and can be read with `dmesg`
+
+The file should be pretty self explanatory and be easy to add any more rules you need.
+
+## Troubleshooting
+
+If the environment variable `VERBOSE` exists and is 'true' it will print additional messages while it's running. Additionally if there is a `DEBUG` that is 'true' it will print every line as it runs. Basically use `VERBOSE` if everything works but just want more info and `DEBUG` when things aren't working.
+
+## Origin
+
+Gathered from far too many man pages and web sites to enumerate.  This was also originally part of https://github.com/vrillusions/bash-scripts but split it off into it's own repo
+
+## License
+
+Primary license is the [unlicense](http://unlicense.org/). If where you are located doesn't honor public domain dedications then you may instead license this project under the [MIT license](http://opensource.org/licenses/MIT). Only need to use one or the other, not both. See `LICENSE.txt` for actual licenses.
