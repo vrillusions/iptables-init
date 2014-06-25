@@ -1,0 +1,5 @@
+## v1.0.0 - released xxxx-xx-xx
+
+* Move to separate repo to make it easier for people to watch for changes and such.
+* Split off ip6tables into a new file instead of on tailing end iptables one.
+* `iptables-reset.sh` will now reset ip6tables as well

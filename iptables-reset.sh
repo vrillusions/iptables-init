@@ -6,23 +6,52 @@
 # Copied and pasted from time enternal
 # It's uber-overkill, but hey, what good script isn't?
 ###
-for a in `cat /proc/net/ip_tables_names`; do
-/sbin/iptables -F -t $a
-/sbin/iptables -X -t $a
+
+# Hardcode to have as few dependencies as possible
+#iptables_cmd="$(which iptables)"
+iptables_cmd="/sbin/iptables"
+for a in $(cat /proc/net/ip_tables_names); do
+${iptables_cmd} -F -t $a
+${iptables_cmd} -X -t $a
 
 if [ $a == nat ]; then
-   /sbin/iptables -t nat -P PREROUTING ACCEPT
-   /sbin/iptables -t nat -P POSTROUTING ACCEPT
-   /sbin/iptables -t nat -P OUTPUT ACCEPT
+   ${iptables_cmd} -t nat -P PREROUTING ACCEPT
+   ${iptables_cmd} -t nat -P POSTROUTING ACCEPT
+   ${iptables_cmd} -t nat -P OUTPUT ACCEPT
 elif [ $a == mangle ]; then
-   /sbin/iptables -t mangle -P PREROUTING ACCEPT
-   /sbin/iptables -t mangle -P INPUT ACCEPT
-   /sbin/iptables -t mangle -P FORWARD ACCEPT
-   /sbin/iptables -t mangle -P OUTPUT ACCEPT
-   /sbin/iptables -t mangle -P POSTROUTING ACCEPT
+   ${iptables_cmd} -t mangle -P PREROUTING ACCEPT
+   ${iptables_cmd} -t mangle -P INPUT ACCEPT
+   ${iptables_cmd} -t mangle -P FORWARD ACCEPT
+   ${iptables_cmd} -t mangle -P OUTPUT ACCEPT
+   ${iptables_cmd} -t mangle -P POSTROUTING ACCEPT
 elif [ $a == filter ]; then
-   /sbin/iptables -t filter -P INPUT ACCEPT
-   /sbin/iptables -t filter -P FORWARD ACCEPT
-   /sbin/iptables -t filter -P OUTPUT ACCEPT
+   ${iptables_cmd} -t filter -P INPUT ACCEPT
+   ${iptables_cmd} -t filter -P FORWARD ACCEPT
+   ${iptables_cmd} -t filter -P OUTPUT ACCEPT
+fi
+done
+
+
+#ip6tables_cmd="$(which ip6tables)"
+ip6tables_cmd="/sbin/ip6tables"
+# ip6tables version
+for a in $(cat /proc/net/ip6_tables_names); do
+${ip6tables_cmd} -F -t $a
+${ip6tables_cmd} -X -t $a
+
+if [ $a == nat ]; then
+   ${ip6tables_cmd} -t nat -P PREROUTING ACCEPT
+   ${ip6tables_cmd} -t nat -P POSTROUTING ACCEPT
+   ${ip6tables_cmd} -t nat -P OUTPUT ACCEPT
+elif [ $a == mangle ]; then
+   ${ip6tables_cmd} -t mangle -P PREROUTING ACCEPT
+   ${ip6tables_cmd} -t mangle -P INPUT ACCEPT
+   ${ip6tables_cmd} -t mangle -P FORWARD ACCEPT
+   ${ip6tables_cmd} -t mangle -P OUTPUT ACCEPT
+   ${ip6tables_cmd} -t mangle -P POSTROUTING ACCEPT
+elif [ $a == filter ]; then
+   ${ip6tables_cmd} -t filter -P INPUT ACCEPT
+   ${ip6tables_cmd} -t filter -P FORWARD ACCEPT
+   ${ip6tables_cmd} -t filter -P OUTPUT ACCEPT
 fi
 done

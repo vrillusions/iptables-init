@@ -29,6 +29,8 @@ echo "/root/iptables/iptables-init-verified.sh >/dev/null" >>/etc/rc.local
 
 From that point on your work flow should be first edit the `iptables-init.sh` file. Then if after running that and are sure it works then copy it to `iptables-init-verified.sh`. In this way you should always be able to restart the system and have previous settings.
 
+IPv6 settings have been moved to their own file now, `ip6tables-init.sh`. The reset script will reset both though.
+
 ## Configuration
 
 By default it will:
