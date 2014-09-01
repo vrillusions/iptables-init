@@ -11,6 +11,11 @@
 #   new module (the '-m' option). Trying to be consistent even if the line
 #   isn't too long.
 #
+# While the overhead is small keep in mind that iptables rules are evaluated
+# from the top down and the first one the matches is the action that is taken.
+# If a certain port is really popular you may want to consider moving it further
+# up
+#
 
 set -e
 set -u
@@ -50,11 +55,13 @@ ${iptables_cmd} -F
 ${iptables_cmd} -Z
 ${iptables_cmd} -X
 
+
 # LIMIT chain, used as endpoint of limited connections
 verbose "Creating LIMIT chain"
 ${iptables_cmd} -N LIMIT
 ${iptables_cmd} -A LIMIT -m limit --limit 3/min -j LOG --log-prefix "[LIMIT BLOCK] "
 ${iptables_cmd} -A LIMIT -j REJECT --reject-with icmp-port-unreachable
+
 
 verbose "Creating main iptables rules"
 # Allow existing connections
@@ -65,24 +72,10 @@ verbose "Creating main iptables rules"
 #${iptables_cmd} -I INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 ${iptables_cmd} -I INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
+
 # allow local interface
 ${iptables_cmd} -A INPUT -i lo -j ACCEPT
 
-# limit how fast incoming ssh connections can happen
-${iptables_cmd} -A INPUT -p tcp -m tcp --dport 22 \
-    -m state --state NEW \
-    -m recent --set --name DEFAULT --rsource
-${iptables_cmd} -A INPUT -p tcp -m tcp --dport 22 \
-    -m state --state NEW \
-    -m recent --update --seconds 30 --hitcount 6 --name DEFAULT --rsource -j LIMIT
-${iptables_cmd} -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
-
-# some ports to allow
-# ssh is handled above
-#${iptables_cmd} -A INPUT -p tcp --dport 22 -j ACCEPT
-${iptables_cmd} -A INPUT -p tcp --dport 80 -j ACCEPT
-# example to allow full access from a single ip
-#${iptables_cmd} -A INPUT -s 192.231.162.123/32 -j ACCEPT
 
 # ok icmp codes
 ${iptables_cmd} -A INPUT -p icmp --icmp-type destination-unreachable -j ACCEPT
@@ -95,6 +88,27 @@ ${iptables_cmd} -A INPUT -p icmp --icmp-type parameter-problem -j ACCEPT
 # for servers
 ${iptables_cmd} -A INPUT -p icmp --icmp-type echo-request -j ACCEPT \
     -m limit --limit 60/minute
+
+
+# limit how fast incoming ssh connections can happen
+${iptables_cmd} -A INPUT -p tcp -m tcp --dport 22 \
+    -m state --state NEW \
+    -m recent --set --name SSHLIMIT --rsource
+${iptables_cmd} -A INPUT -p tcp -m tcp --dport 22 \
+    -m state --state NEW \
+    -m recent --update --seconds 30 --hitcount 6 --name SSHLIMIT --rsource -j LIMIT
+${iptables_cmd} -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+
+
+# some ports to allow
+# ssh is handled above but if you don't want limiter
+#${iptables_cmd} -A INPUT -p tcp --dport 22 -j ACCEPT
+${iptables_cmd} -A INPUT -p tcp -m multiport --dports 80,443 -j ACCEPT
+# example of just 443
+#${iptables_cmd} -A INPUT -p tcp --dport 80 -j ACCEPT
+# example to allow full access from a single ip
+#${iptables_cmd} -A INPUT -s 192.231.162.123/32 -j ACCEPT
+
 
 # log unhandled packets
 # Once you have things setup probably want to comment this out so you're not filling logs

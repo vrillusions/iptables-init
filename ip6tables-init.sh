@@ -11,6 +11,11 @@
 #   new module (the '-m' option). Trying to be consistent even if the line
 #   isn't too long.
 #
+# While the overhead is small keep in mind that iptables rules are evaluated
+# from the top down and the first one the matches is the action that is taken.
+# If a certain port is really popular you may want to consider moving it further
+# up
+#
 
 set -e
 set -u
@@ -49,20 +54,26 @@ ${ip6tables_cmd} -F
 ${ip6tables_cmd} -Z
 ${ip6tables_cmd} -X
 
+
 # again, choose either conntrack or state, don't need both
 #${ip6tables_cmd} -I INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 ${ip6tables_cmd} -I INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 ${ip6tables_cmd} -A INPUT -i lo -j ACCEPT
+
+
 # allow link-local communications
 ${ip6tables_cmd} -A INPUT -s fe80::/10 -j ACCEPT
+
+
 # for stateless autoconfiguration (restrict NDP messages to hop limit of 255)
 # commented out on openvz containers
 #${ip6tables_cmd} -A INPUT -p icmpv6 --icmpv6-type neighbor-solicitation -m hl --hl-eq 255 -j ACCEPT
 #${ip6tables_cmd} -A INPUT -p icmpv6 --icmpv6-type neighbor-advertisement -m hl --hl-eq 255 -j ACCEPT
 #${ip6tables_cmd} -A INPUT -p icmpv6 --icmpv6-type router-solicitation -m hl --hl-eq 255 -j ACCEPT
 #${ip6tables_cmd} -A INPUT -p icmpv6 --icmpv6-type router-advertisement -m hl --hl-eq 255 -j ACCEPT
-${ip6tables_cmd} -A INPUT -p tcp --dport 22 -j ACCEPT
-${ip6tables_cmd} -A INPUT -p tcp --dport 80 -j ACCEPT
+
+
+# ok icmp codes
 ${ip6tables_cmd} -A INPUT -p icmpv6 --icmpv6-type destination-unreachable -j ACCEPT
 ${ip6tables_cmd} -A INPUT -p icmpv6 --icmpv6-type packet-too-big -j ACCEPT
 ${ip6tables_cmd} -A INPUT -p icmpv6 --icmpv6-type time-exceeded -j ACCEPT
@@ -71,10 +82,17 @@ ${ip6tables_cmd} -A INPUT -p icmpv6 --icmpv6-type echo-request -j ACCEPT -m limi
 # need this for ip6tables but not iptables
 ${ip6tables_cmd} -A INPUT -p icmpv6 --icmpv6-type echo-reply -j ACCEPT
 
+
+# Additional ports to open
+${ip6tables_cmd} -A INPUT -p tcp --dport 22 -j ACCEPT
+${ip6tables_cmd} -A INPUT -p tcp -m multiport --dports 80,443 -j ACCEPT
+
+
 verbose "Setting defaults"
 ${ip6tables_cmd} -P INPUT DROP
 ${ip6tables_cmd} -P FORWARD DROP
 ${ip6tables_cmd} -P OUTPUT ACCEPT
+
 
 verbose "ip6tables setup has completed. Can view stats by running 'ip6tables -nvL' as root"
 
