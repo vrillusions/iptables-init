@@ -1,3 +1,13 @@
+# iptables init
+
+Shell scripts to setup some basic iptables rules. Meant for dedicated servers and VPS where typically the place you bought it from opens up everything to that server.
+
+## Goals
+
+- drop in and run to have a working minimal config (note that the script may need tweaks if your server is running OpenVZ).
+- show that iptables isn't as scary or complicated as people may think
+- to support that, heavily comment the script to help understand why certain things are being done a certain way
+
 ## Initial setup
 
 ```shell
@@ -26,13 +36,19 @@ chmod 0700 iptables-reset.sh
 cp iptables-init.sh iptables-init-verified.sh
 echo "/root/iptables/iptables-init-verified.sh >/dev/null" >>/etc/rc.local
 cat /etc/rc.local
-# verify there isn't an `exit 0` before your new iptables scripts or they will
-# never run
+# verify there isn't an `exit 0` in /etc/rc.local before the above lines or
+# they will never run
 ```
 
 From that point on your work flow should be first edit the `iptables-init.sh` file. Then if after running that and are sure it works then copy it to `iptables-init-verified.sh`. In this way you should always be able to restart the system and have previous settings.
 
 IPv6 settings have been moved to their own file now, `ip6tables-init.sh`. The reset script will reset both though.
+
+## Monitoring firewall
+
+As root, run `iptables -nvL` to get a list of all rules and their hit count.
+
+By default any inbound traffic not handled by iptables is logged before being dropped. You can view this log by running `dmesg` as root. If you run `dmesg -c` it will print the kernel log and then clear it which makes it helpful to see what new log entries are being created. You can comment out that line if you don't care about logging everything (search for "-- log unhandled packets").
 
 ## Configuration
 
@@ -53,6 +69,13 @@ If the environment variable `VERBOSE` exists and is 'true' it will print additio
 
 Gathered from far too many man pages and web sites to enumerate.  This was also originally part of https://github.com/vrillusions/bash-scripts but split it off into it's own repo
 
+## TODO
+
+- Make more user friendly. Currently need to modify things all throughout the file. Should have some variables at the top.
+- Make ssh port one of those settings since a lot of people don't run it on a standard port
+- Check for an environment variable like `IPTABLES_INIT_CONFIG` and source that file
+- Create some sort of generator process so I can set all the rules in one spot and spit out both `iptables` and `ip6tables` lines.
+
 ## License
 
-Primary license is the [unlicense](http://unlicense.org/). If where you are located doesn't honor public domain dedications then you may instead license this project under the [MIT license](http://opensource.org/licenses/MIT). Only need to use one or the other, not both. See `LICENSE.txt` for actual licenses.
+Primary license is the [unlicense](http://unlicense.org/). If where you are located doesn't honor public domain dedications then you may instead license this project under the [MIT license](http://opensource.org/licenses/MIT). Only required to use one of those licenses. See `LICENSE.txt` for actual licenses.

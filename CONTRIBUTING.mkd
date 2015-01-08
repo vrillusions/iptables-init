@@ -1,0 +1,32 @@
+# Code contributions
+
+First off thanks for taking the time to fix something. I really do appreciate it. Here are some very minimal rules to follow though.
+
+## Sublicensing
+
+Some basic legal stuff:
+
+- By way of submitting a pull request you acknowledge that your contribution will be licensed under the same license as the rest of the project. You still own copyright on it which means you are still allowed to use that code wherever else you want and licensed however you want, even all rights reserved.
+- You give permission to the project to change that license at any time and that your code may be used under this new license. For example if the project stats at GPL and then is changed to MIT, You give the project permission to relicense your code.
+- You assert that the code is of your creation alone or if copied from elsewhere that it was under a license that is compatible with this projects license. Keep in mind that any work you do for companies is typically considered "work for hire" which means you need to get the company's permission to use it elsewhere.
+
+## Conventions
+
+Pretty much follow the format of current source files. Some general rules though:
+
+- indent four spaces, no tabs
+- remove trailing white space from lines
+- wrap lines preferrably at 80 characters and no longer than 100 characters. This rule doesn't apply to markdown files though.
+
+## Submitting changes
+
+This is written for someone who is already familiar with how git works. See help in github if you don't understand something. You are also more than welcome to just create an issue and specify what changes need to be made there if you're not comfortable with git.
+
+- clone this project via `git clone https://github.com/vrillusions/iptables-init.git`
+- fork project in github
+- go to `iptables-init` folder and add your fork via `git remote add YourUsername ssh://git@github.com:YourUsername/iptables-init.git` and do a `git fetch YourUsername`
+- `git checkout -b short-description-of-change`
+- make any changes and commit them.
+- squash commits. can have multiple commits if it makes sense to.
+- `git push YourUsername short-description-of-change`
+- check your fork on github.com and make a pull request
