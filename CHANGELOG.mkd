@@ -1,5 +1,10 @@
-## v1.0.0 - released xxxx-xx-xx
+## 0.2.0 - released xxxx-xx-xx
 
+* Create folders for several different styles of rulesets
+
+## 0.1.0 - 2015-01-08
+
+* Initial tagged version
 * Move to separate repo to make it easier for people to watch for changes and such.
 * Split off ip6tables into a new file instead of on tailing end iptables one.
 * `iptables-reset.sh` will now reset ip6tables as well

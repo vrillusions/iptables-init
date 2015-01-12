@@ -1,0 +1,16 @@
+## Summary
+
+- IPv4 only
+- All egress traffic allowed
+- All traffic on local interface allowed
+- Ingress ICMP
+    - destination-unreachable
+    - source-quench
+    - time-exceeded
+    - parameter-problem
+    - echo-request (ping requests) - limited to 10 per second
+- Ingress TCP
+    - 22 - SSH - limited to 8 per minute
+    - 80 - HTTP
+    - 443 - HTTPS
+- Logging is enabled at a limit of 15 per minute

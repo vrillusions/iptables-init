@@ -8,7 +8,19 @@ Shell scripts to setup some basic iptables rules. Meant for dedicated servers an
 - show that iptables isn't as scary or complicated as people may think
 - to support that, heavily comment the script to help understand why certain things are being done a certain way
 
+## Project layout
+
+Aside from the usual files in base directory. The shell scripts are in subfolders to make it easy to add other custom ones at a later time.  Curent folders and description:
+
+| Name               | Description
+| :----------------: | :----------
+| 01_common          | Files you'd want in addition to others. Namely this is the reset script.
+| ipv4_basic_ingress | Only permit some ingress traffic and allow all egress traffic. This is the original iptables-init. (IPv4 version)
+| ipv6_basic_ingress | Only permit some ingress traffic and allow all egress traffic. This is the original iptables-init. (IPv6 version)
+
 ## Initial setup
+
+These are for the `ipv4_basic_ingress` rules which makes a good drop in if you want to quickly get the firewall going.
 
 ```shell
 # Become root for these steps if you don't login to server as root
@@ -17,32 +29,28 @@ mkdir /root/iptables
 cd /root/iptables
 # These links can be obtained by viewing a file and then choose raw
 # As of May 2014 these links are valid
-wget https://raw.githubusercontent.com/vrillusions/iptables-init/master/iptables-init.sh
-wget https://raw.githubusercontent.com/vrillusions/iptables-init/master/iptables-reset.sh
-chmod 0700 iptables-init.sh
+wget https://raw.githubusercontent.com/vrillusions/iptables-init/master/01_common/iptables-reset.sh
+wget https://raw.githubusercontent.com/vrillusions/iptables-init/master/ipv4_basic_ingress/iptables-init.sh
 chmod 0700 iptables-reset.sh
-# Edit iptables-init.sh as needed (by default it allows ssh (TCP/22) and both
-# http (TCP/80) and https (TCP/443). Also defaults may not work with some vps
-# providers. See the file for more info
-#
-# Before running this make sure you have a way to recover, either the ability
-# to power cycle the server or an admin console you can issue commands.
-/root/iptables/iptables-init.sh
-# If nothing works and you get kicked from server, restart the system or via
-# console run /root/iptables/iptables-reset.sh to get back in. Adjust settings
-# and try again.
-#
-# If it does work:
+chmod 0700 iptables-init.sh
+```
+
+- Edit `iptables-init.sh` as needed (by default it allows ssh (`TCP/22`) and both http (`TCP/80`) and https (`TCP/443`). Also defaults may not work with some vps providers. See the file for more info.
+- Before running this make sure you have a way to recover, either the ability to power cycle the server or an admin console you can issue commands.
+- Run `/root/iptables/iptables-init.sh`
+- If nothing works and you get kicked from server, restart the system or via console run `/root/iptables/iptables-reset.sh` to get back in. Adjust settings and try again.
+- If it does work then you can mark it as verified
+
+```shell
 cp iptables-init.sh iptables-init-verified.sh
 echo "/root/iptables/iptables-init-verified.sh >/dev/null" >>/etc/rc.local
-cat /etc/rc.local
-# verify there isn't an `exit 0` in /etc/rc.local before the above lines or
-# they will never run
 ```
+
+You'll want to view `/etc/rc.local` and double check you don't see something like `exit 0`. You can either remove it or move that line back to the bottome of the script.
 
 From that point on your work flow should be first edit the `iptables-init.sh` file. Then if after running that and are sure it works then copy it to `iptables-init-verified.sh`. In this way you should always be able to restart the system and have previous settings.
 
-IPv6 settings have been moved to their own file now, `ip6tables-init.sh`. The reset script will reset both though.
+The above process is for just IPv4. For IPv6 use `ipv6_basic_ingress`. The process is the same other than the file is called `ip6tables-init.sh`. You can use `iptables-reset.sh` to reset both IPv4 and IPv6.
 
 ## Monitoring firewall
 
