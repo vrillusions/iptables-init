@@ -87,3 +87,5 @@ Gathered from far too many man pages and web sites to enumerate.  This was also 
 ## License
 
 Primary license is the [unlicense](http://unlicense.org/). If where you are located doesn't honor public domain dedications then you may instead license this project under the [MIT license](http://opensource.org/licenses/MIT). Only required to use one of those licenses. See `LICENSE.txt` for actual licenses.
+
+Join the chat at https://gitter.im/vrillusions/iptables-init
