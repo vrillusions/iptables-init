@@ -1,5 +1,7 @@
 # iptables init
 
+[![Build Status](https://travis-ci.org/vrillusions/iptables-init.svg?branch=master)](https://travis-ci.org/vrillusions/iptables-init)
+
 Shell scripts to setup some basic iptables rules. Meant for dedicated servers and VPS where typically the place you bought it from opens up everything to that server.
 
 ## Goals

@@ -10,48 +10,57 @@
 # Hardcode to have as few dependencies as possible
 #iptables_cmd="$(which iptables)"
 iptables_cmd="/sbin/iptables"
-for a in $(cat /proc/net/ip_tables_names); do
-${iptables_cmd} -F -t $a
-${iptables_cmd} -X -t $a
 
-if [ $a == nat ]; then
-   ${iptables_cmd} -t nat -P PREROUTING ACCEPT
-   ${iptables_cmd} -t nat -P POSTROUTING ACCEPT
-   ${iptables_cmd} -t nat -P OUTPUT ACCEPT
-elif [ $a == mangle ]; then
-   ${iptables_cmd} -t mangle -P PREROUTING ACCEPT
-   ${iptables_cmd} -t mangle -P INPUT ACCEPT
-   ${iptables_cmd} -t mangle -P FORWARD ACCEPT
-   ${iptables_cmd} -t mangle -P OUTPUT ACCEPT
-   ${iptables_cmd} -t mangle -P POSTROUTING ACCEPT
-elif [ $a == filter ]; then
-   ${iptables_cmd} -t filter -P INPUT ACCEPT
-   ${iptables_cmd} -t filter -P FORWARD ACCEPT
-   ${iptables_cmd} -t filter -P OUTPUT ACCEPT
+if ! command -v "${iptables_cmd}" 1>/dev/null; then
+    echo "[ipv4] Could not find ${iptables_cmd}. Skipping." >&2
+else
+    while read -r tablename; do
+        ${iptables_cmd} -F -t "${tablename}"
+        ${iptables_cmd} -X -t "${tablename}"
+
+        if [ "${tablename}" == "nat" ]; then
+            ${iptables_cmd} -t nat -P PREROUTING ACCEPT
+            ${iptables_cmd} -t nat -P POSTROUTING ACCEPT
+            ${iptables_cmd} -t nat -P OUTPUT ACCEPT
+        elif [ "${tablename}" == "mangle" ]; then
+            ${iptables_cmd} -t mangle -P PREROUTING ACCEPT
+            ${iptables_cmd} -t mangle -P INPUT ACCEPT
+            ${iptables_cmd} -t mangle -P FORWARD ACCEPT
+            ${iptables_cmd} -t mangle -P OUTPUT ACCEPT
+            ${iptables_cmd} -t mangle -P POSTROUTING ACCEPT
+        elif [ "${tablename}" == "filter" ]; then
+            ${iptables_cmd} -t filter -P INPUT ACCEPT
+            ${iptables_cmd} -t filter -P FORWARD ACCEPT
+            ${iptables_cmd} -t filter -P OUTPUT ACCEPT
+        fi
+    done </proc/net/ip_tables_names
 fi
-done
 
 
+# ip6tables version
 #ip6tables_cmd="$(which ip6tables)"
 ip6tables_cmd="/sbin/ip6tables"
-# ip6tables version
-for a in $(cat /proc/net/ip6_tables_names); do
-${ip6tables_cmd} -F -t $a
-${ip6tables_cmd} -X -t $a
+if ! command -v "${ip6tables_cmd}" 1>/dev/null; then
+    echo "[ipv6] Could not find ${ip6tables_cmd}. Skipping." >&2
+else
+    while read -r tablename; do
+        ${ip6tables_cmd} -F -t "${tablename}"
+        ${ip6tables_cmd} -X -t "${tablename}"
 
-if [ $a == nat ]; then
-   ${ip6tables_cmd} -t nat -P PREROUTING ACCEPT
-   ${ip6tables_cmd} -t nat -P POSTROUTING ACCEPT
-   ${ip6tables_cmd} -t nat -P OUTPUT ACCEPT
-elif [ $a == mangle ]; then
-   ${ip6tables_cmd} -t mangle -P PREROUTING ACCEPT
-   ${ip6tables_cmd} -t mangle -P INPUT ACCEPT
-   ${ip6tables_cmd} -t mangle -P FORWARD ACCEPT
-   ${ip6tables_cmd} -t mangle -P OUTPUT ACCEPT
-   ${ip6tables_cmd} -t mangle -P POSTROUTING ACCEPT
-elif [ $a == filter ]; then
-   ${ip6tables_cmd} -t filter -P INPUT ACCEPT
-   ${ip6tables_cmd} -t filter -P FORWARD ACCEPT
-   ${ip6tables_cmd} -t filter -P OUTPUT ACCEPT
+        if [ "${tablename}" == "nat" ]; then
+            ${ip6tables_cmd} -t nat -P PREROUTING ACCEPT
+            ${ip6tables_cmd} -t nat -P POSTROUTING ACCEPT
+            ${ip6tables_cmd} -t nat -P OUTPUT ACCEPT
+        elif [ "${tablename}" == "mangle" ]; then
+            ${ip6tables_cmd} -t mangle -P PREROUTING ACCEPT
+            ${ip6tables_cmd} -t mangle -P INPUT ACCEPT
+            ${ip6tables_cmd} -t mangle -P FORWARD ACCEPT
+            ${ip6tables_cmd} -t mangle -P OUTPUT ACCEPT
+            ${ip6tables_cmd} -t mangle -P POSTROUTING ACCEPT
+        elif [ "${tablename}" == "filter" ]; then
+            ${ip6tables_cmd} -t filter -P INPUT ACCEPT
+            ${ip6tables_cmd} -t filter -P FORWARD ACCEPT
+            ${ip6tables_cmd} -t filter -P OUTPUT ACCEPT
+        fi
+    done </proc/net/ip_tables_names
 fi
-done
